@@ -187,3 +187,25 @@ void code_asm(Token* tokens) {
     printf("    syscall\n");
 }
 
+int main() {
+    char expression[256];
+    printf("\nEnter an arithmetic expression: ");
+    fgets(expression, sizeof(expression), stdin);
+
+    Token* tokens = tokenize(expression);
+    if (!tokens) return 1;    
+
+    int result;
+    if (parse(tokens, &result) == -1) {
+        printf("Error: Parsing failed\n");
+        free(tokens);
+        return 1;
+    }
+
+    printf("Parsed result: %d\n\n-----------------------\n", result);
+    printf("x86 ASM code:\n-----------------------\n");
+    code_asm(tokens);
+
+    free(tokens);
+    return 0;
+}
