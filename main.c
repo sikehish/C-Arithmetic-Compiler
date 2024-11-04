@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-typedef enum TokenType{ TOKEN_PLUS, TOKEN_SUB, TOKEN_MUL, TOKEN_DIV, TOKEN_NUM, TOKEN_END} TokenType;
+typedef enum TokenType{ TOKEN_ADD, TOKEN_SUB, TOKEN_MUL, TOKEN_DIV, TOKEN_NUM, TOKEN_END} TokenType;
 
 typedef struct Token{
     TokenType type;
@@ -11,13 +11,13 @@ typedef struct Token{
 
   typedef struct Result{
         TokenType type;
-        int isOperator ;
+        int isOperator;
     } Result;
 
 void checkChar(char c, struct Result* result) {
     switch (c) {
         case '+':
-            result->type = TOKEN_PLUS; 
+            result->type = TOKEN_ADD; 
             result->isOperator = 1; 
             break;
         case '-':
@@ -71,6 +71,50 @@ Token* tokenize(char* expression){
 }
 
 // Parsing
+int parse(Token* tokens, int* ans) {
+    if (tokens->type != TOKEN_NUM && tokens->type != TOKEN_SUB && tokens->type != TOKEN_ADD) return -1; 
+    
+
+    int sign = 1;
+    if (tokens->type == TOKEN_SUB || tokens->type == TOKEN_ADD) {
+        sign = (tokens->type == TOKEN_SUB) ? -1 : 1;
+        tokens++;
+    }
+
+    if (tokens->type != TOKEN_NUM) return -1; 
+    *ans = (sign * tokens->value);
+    tokens++;
+
+    while (tokens->type != TOKEN_END) {
+        TokenType op = tokens->type;
+        tokens++;
+
+        if (tokens->type != TOKEN_NUM) return -1; 
+        
+
+        int num = tokens->value;
+        tokens++;
+
+        switch (op) {
+            case TOKEN_ADD:
+                *ans += num;
+                break;
+            case TOKEN_SUB:
+                *ans -= num;
+                break;
+            case TOKEN_MUL:
+                *ans *= num;
+                break;
+            case TOKEN_DIV:
+                if (num == 0) return -1;
+                *ans /= num;
+                break;
+            default:
+                return -1; 
+        }
+    }
+    return 1; 
+}
 
 
 // Code gen
