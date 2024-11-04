@@ -118,4 +118,72 @@ int parse(Token* tokens, int* ans) {
 }
 
 // Code gen
+void code_asm(Token* tokens) {
+    printf("section .data\n");
+    printf("result dq 0\n\n");
+    printf("section .text\n");
+    printf("global _start\n\n");
+    printf("_start:\n");
+
+    int sign = 1;
+
+    while (tokens->type == TOKEN_SUB) {
+        sign *= -1;
+        tokens++;
+    }
+
+    if (tokens->type == TOKEN_ADD) {
+        tokens++;
+    }
+
+    if (tokens->type != TOKEN_NUM) {
+        printf("Error: Expected a number after prefix operators\n");
+        return;
+    }
+
+    printf("    MOV rax, %d\n", sign * tokens->value);
+    tokens++;
+
+    while (tokens->type != TOKEN_END) {
+        TokenType op = tokens->type;
+        tokens++;
+
+        if (tokens->type != TOKEN_NUM) {
+            printf("Error: Expected a number after operator\n");
+            return;
+        }
+
+        int num = tokens->value;
+        tokens++;
+
+        switch (op) {
+            case TOKEN_ADD:
+                printf("    ADD rax, %d\n", num);
+                break;
+            case TOKEN_SUB:
+                printf("    SUB rax, %d\n", num);
+                break;
+            case TOKEN_MUL:
+                printf("    IMUL rax, %d\n", num);
+                break;
+            case TOKEN_DIV:
+                if (num == 0) {
+                    printf("Error: Division by zero\n");
+                    return;
+                }
+                printf("    MOV rbx, %d\n", num);
+                printf("    IDIV rbx\n");
+                break;
+            default:
+                printf("Error: Unexpected token type\n");
+                return;
+        }
+    }
+
+    printf("    MOV [result], rax\n");
+
+    printf("    mov rax, 60\n");  // sys_exit syscall number for x86_64
+    printf("    xor rdi, rdi\n"); // exit code 0
+    printf("    syscall\n");
+}
 
