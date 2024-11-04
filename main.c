@@ -72,26 +72,27 @@ Token* tokenize(char* expression){
 
 // Parsing
 int parse(Token* tokens, int* ans) {
-    if (tokens->type != TOKEN_NUM && tokens->type != TOKEN_SUB && tokens->type != TOKEN_ADD) return -1; 
-    
+    if (tokens->type != TOKEN_NUM && tokens->type != TOKEN_SUB && tokens->type != TOKEN_ADD) {
+        return -1; 
+    }
 
-    int sign = 1;
-    if (tokens->type == TOKEN_SUB || tokens->type == TOKEN_ADD) {
-        sign = (tokens->type == TOKEN_SUB) ? -1 : 1;
+    int sign = 1; 
+    while (tokens->type == TOKEN_SUB) {
+        sign *= -1;
         tokens++;
     }
 
+    if(tokens->type==TOKEN_ADD) tokens++;
+
     if (tokens->type != TOKEN_NUM) return -1; 
-    *ans = (sign * tokens->value);
+    *ans = sign * tokens->value; 
     tokens++;
 
     while (tokens->type != TOKEN_END) {
-        TokenType op = tokens->type;
+        TokenType op = tokens->type; 
         tokens++;
 
         if (tokens->type != TOKEN_NUM) return -1; 
-        
-
         int num = tokens->value;
         tokens++;
 
@@ -106,7 +107,7 @@ int parse(Token* tokens, int* ans) {
                 *ans *= num;
                 break;
             case TOKEN_DIV:
-                if (num == 0) return -1;
+                if (num == 0) return -1; 
                 *ans /= num;
                 break;
             default:
@@ -116,5 +117,5 @@ int parse(Token* tokens, int* ans) {
     return 1; 
 }
 
-
 // Code gen
+
